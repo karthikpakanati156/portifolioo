@@ -1,1 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Our Memories & Fantasies</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap');
 
+        :root {
+            --bright-red: #ff1e56;
+            --bright-green: #00d26a;
+            --soft-pink: #ffccd5;
+            --rich-pink: #ff4d6d;
+            --light-purple: #c7ceea;
+            --deep-purple: #3a1346;
+            --card-glass: rgba(255, 255, 255, 0.85);
+            --border-glass: rgba(255, 255, 255, 0.6);
+            --shadow-glass: 0 12px 35px rgba(255, 30, 86, 0.18);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: #2b2b2b;
+            background: linear-gradient(135deg, #fff0f3 0%, #f7fff7 50%, #f3e8ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient floating background elements for main UI */
+        .ambient-bg-element {
+            position: fixed;
+            z-index: -1;
+            opacity: 0.12;
+            pointer-events: none;
+            filter: blur(3px);
+            font-size: 35vh;
+            animation: breathe 8s ease-in-out infinite alternate;
+        }
+        
+        @keyframes breathe {
+            0% { transform: scale(1) translateY(0); }
+            100% { transform: scale(1.05) translateY(-15px); }
+        }
+
+        /* Small hearts pattern overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cpath fill='%23ff1e56' fill-opacity='0.15' d='M30 18c-4-6-12-6-16 0-3.5 5.5-1 12 6 18l10 10 10-10c7-6 9.5-12.5 6-18-4-6-12-6-16 0z'/%3E%3Cpath fill='%2300d26a' fill-opacity='0.15' d='M90 78c-4-6-12-6-16 0-3.5 5.5-1 12 6 18l10 10 10-10c7-6 9.5-12.5 6-18-4-6-12-6-16 0z'/%3E%3C/g%3E%3C/svg%3E");
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+        .glass-panel {
+            background: var(--card-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            box-shadow: var(--shadow-glass);
+        }
+
+        .screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 1;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        
+        .screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.98);
+            z-index: -1;
+        }
+
+        /* Floating Hearts */
+        .floating-heart {
+            position: fixed;
+            bottom: -40px;
+            font-size: 28px;
+            animation: floatUp 4.5s ease-in forwards;
+            pointer-events: none;
+            z-index: 9999;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.25));
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.8) rotate(0deg); opacity: 1; }
+            50% { transform: translateY(-50vh) scale(1.3) rotate(25deg); opacity: 0.9; }
+            100% { transform: translateY(-110vh) scale(1.5) rotate(-25deg); opacity: 0; }
+        }
+
+        /* ---------------- LOGIN SCREEN ---------------- */
+        #login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 45px 35px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .login-card h1 {
+            color: var(--bright-red);
+            font-size: 2.3rem;
+            margin-bottom: 8px;
+        }
+        
+        .login-card p {
+            color: #555;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid rgba(255, 77, 109, 0.25);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--bright-red);
+            box-shadow: 0 0 12px rgba(255, 30, 86, 0.3);
+            background: #ffffff;
+        }
+
+        button.action-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--bright-red), #ff758c 60%, var(--bright-green));
+            color: white;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(255, 30, 86, 0.35);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button.action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 30, 86, 0.45);
+        }
+
+        .error-message {
+            color: #d8000c;
+            font-size: 0.88rem;
+            margin-top: 14px;
+            min-height: 22px;
+            font-weight: 500;
+        }
+
+        /* ---------------- MAIN SCREEN ---------------- */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 28px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .app-header h2 {
+            font-size: 1.6rem;
+            background: linear-gradient(45deg, var(--bright-red), var(--bright-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logout-btn {
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            background: transparent;
+            color: var(--bright-red);
+            border: 1.5px solid var(--bright-red);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: var(--bright-red);
+            color: white;
+        }
+
+        .stories-container {
+            display: flex;
+            gap: 24px;
+            padding: 25px 28px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .stories-container::-webkit-scrollbar { display: none; }
+
+        .story-avatar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            gap: 8px;
+            transition: transform 0.2s;
+        }
+        .story-avatar:hover { transform: scale(1.06); }
+
+        .story-ring {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            padding: 3.5px;
+            background: linear-gradient(45deg, var(--bright-red), #ff758c, #ffd166);
+            box-shadow: 0 4px 12px rgba(255, 30, 86, 0.3);
+        }
+
+        .story-ring.fantasies-ring {
+            background: linear-gradient(45deg, var(--bright-green), #a8ff78, #78ffd6);
+            box-shadow: 0 4px 12px rgba(0, 210, 106, 0.3);
+        }
+
+        .story-inner {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            border: 2.5px solid white;
+        }
+
+        .story-avatar span {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Inbox List */
+        .inbox-container {
+            padding: 0 28px 40px 28px;
+            max-width: 820px;
+            margin: 0 auto;
+        }
+
+        .inbox-title {
+            font-size: 1.15rem;
+            margin-bottom: 18px;
+            color: #666;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .message-card {
+            padding: 22px 24px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 5px solid var(--bright-red);
+        }
+        
+        .message-card:nth-child(2) { border-left-color: var(--bright-green); }
+        .message-card:nth-child(3) { border-left-color: var(--rich-pink); }
+
+        .message-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 77, 109, 0.25);
+        }
+
+        .msg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .msg-sender {
+            font-weight: 600;
+            color: #222;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.05rem;
+        }
+        .msg-date {
+            font-size: 0.85rem;
+            color: #888;
+            font-weight: 500;
+        }
+        .msg-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #333;
+        }
+        .msg-snippet {
+            font-size: 0.92rem;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ---------------- LETTER VIEWER ---------------- */
+        #letter-viewer {
+            background: rgba(0, 0, 0, 0.65);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .letter-paper {
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            background: #fffdf9;
+            border-radius: 16px;
+            padding: 45px 35px;
+            position: relative;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            overflow-y: auto;
+            border: 1px solid #f4e8e1;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            background: #fff0f3;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: var(--bright-red);
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .letter-content h3 {
+            font-size: 1.9rem;
+            color: var(--bright-red);
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px dashed rgba(255, 77, 109, 0.25);
+            padding-bottom: 15px;
+        }
+        
+        .letter-meta {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05rem;
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .letter-content p {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.18rem;
+            line-height: 1.85;
+            color: #2b2b2b;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+        }
+        
+        .letter-footer {
+            margin-top: 35px;
+            text-align: right;
+            font-style: italic;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            color: var(--bright-red);
+        }
+
+        /* ---------------- DYNAMIC STORIES VIEWER ---------------- */
+        #story-viewer {
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .story-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2;
+            transition: background 0.8s ease;
+        }
+
+        .story-huge-flower {
+            position: absolute;
+            font-size: 40vh;
+            opacity: 0.25;
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(4px) drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .story-progress-container {
+            display: flex;
+            gap: 4px;
+            padding: 16px 12px;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: 20;
+        }
+        .progress-segment {
+            flex: 1;
+            height: 3.5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: white;
+            transition: width 0.1s linear;
+        }
+
+        .story-header {
+            position: absolute;
+            top: 34px;
+            width: 100%;
+            padding: 10px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+        }
+        
+        .story-header-info { display: flex; flex-direction: column; }
+        .story-category-tag {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.8);
+            font-weight: 600;
+        }
+        .story-date-badge {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #ffffff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+        }
+        .story-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 1.6rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .story-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .story-glass-card {
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 35px 25px;
+            border-radius: 20px;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        
+        .story-timeline-chip {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .story-glass-card h2 {
+            font-size: 2.1rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        
+        .story-glass-card p {
+            font-size: 1.2rem;
+            line-height: 1.7;
+            color: #f1f1f1;
+            font-weight: 300;
+            white-space: pre-wrap;
+        }
+
+        .story-controls {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            z-index: 15;
+        }
+        .story-controls div { flex: 1; cursor: pointer; }
+
+        @media (max-width: 600px) {
+            .letter-paper { padding: 35px 20px; border-radius: 0; min-height: 100vh; }
+            .story-glass-card h2 { font-size: 1.75rem; }
+            .story-glass-card p { font-size: 1.05rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .screen { transition: none; }
+            .floating-heart, .ambient-bg-element { animation: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Main Background Flowers -->
+    <div class="ambient-bg-element" style="top: -5%; left: -10%;">🌹</div>
+    <div class="ambient-bg-element" style="bottom: -5%; right: -10%;">🌻</div>
+    <div class="ambient-bg-element" style="top: 40%; right: -5%; font-size: 25vh; opacity: 0.08;">🌺</div>
+    <div class="ambient-bg-element" style="bottom: 30%; left: -5%; font-size: 20vh; opacity: 0.08;">🌸</div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="screen">
+        <div class="login-card glass-panel">
+            <h1>Our Memories</h1>
+            <p>A private romantic sanctuary just for us 💖</p>
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Your name" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Your DOB (DDMMYY)" autocomplete="off">
+                <div id="login-error" class="error-message"></div>
+            </div>
+            <button class="action-btn" onclick="handleLogin()">Unlock Memories 🤍</button>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="main-screen" class="screen hidden">
+        <div class="app-header">
+            <h2 id="welcome-text">Inbox</h2>
+            <button class="logout-btn" onclick="handleLogout()">Lock</button>
+        </div>
+
+        <div class="stories-container">
+            <div class="story-avatar" onclick="openStoriesCollection('memories')">
+                <div class="story-ring">
+                    <div class="story-inner">🌸</div>
+                </div>
+                <span>Memories</span>
+            </div>
+            <div class="story-avatar" onclick="openStoriesCollection('fantasies')">
+                <div class="story-ring fantasies-ring">
+                    <div class="story-inner">💚</div>
+                </div>
+                <span>Fantasies</span>
+            </div>
+        </div>
+
+        <div class="inbox-container">
+            <div class="inbox-title">💌 Letters from Karthik</div>
+            <div id="inbox-list"></div>
+        </div>
+    </div>
+
+    <!-- LETTER VIEWER -->
+    <div id="letter-viewer" class="screen hidden">
+        <div class="letter-paper">
+            <button class="close-btn" onclick="closeLetter()">×</button>
+            <div class="letter-content" id="letter-content-area"></div>
+        </div>
+    </div>
+
+    <!-- STORIES VIEWER -->
+    <div id="story-viewer" class="screen hidden">
+        <div class="story-bg" id="story-bg-element"></div>
+        <div id="story-bg-flowers"></div> <!-- Container for massive background flowers -->
+        <div class="story-progress-container" id="story-progress-bars"></div>
+        
+        <div class="story-header">
+            <div class="story-header-info">
+                <span class="story-category-tag" id="story-category-tag">MEMORIES</span>
+                <span class="story-date-badge" id="story-date-display">Date</span>
+            </div>
+            <button class="story-close" onclick="closeStories()">×</button>
+        </div>
+        
+        <div class="story-controls">
+            <div onclick="prevStory()"></div>
+            <div onclick="nextStory()"></div>
+        </div>
+        
+        <div class="story-content">
+            <div class="story-glass-card" id="story-content-area">
+                <!-- Content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==================== DATA STRUCTURES ==================== */
+        
+        // 1. MESSAGES (Inbox)
+        const messagesData = [
+            {
+                id: 1,
+                sender: "Karthik Pakanati",
+                receiver: "Priyanshu Pakanati",
+                date: "Message 1",
+                title: "To the love of my life",
+                snippet: "nuvvu nannu adigavu kada inthaku mundu...",
+                body: "nuvvu nannu adigavu kada inthaku mundu I love you cheppevadivi kadhu ippudu paddakala chepthunnavu ani, appudu nenu inkevaru unnaru Cheppadaniki ani annanu. Naa uddesham\n\nNiku kakapothe inkevariki cheptanu ani innalu vere vallu unnaru ani kadhu.sare nuvvu Cheppu have you ever felt like a side chick? Did I ever treat you like that?!.\n\nFor me I love you ane word is something special it's not like a greeting like hii,good morning or hello it's a feeling coming out of heart to express love.so I want to use very low. That's what I was thinking. Sare mari ippudu Enduku chepthunnav ante feeling hard.chala miss avuthunnanu papa ninnu.emotions control avvadam ledu so it's happening\n\nNiku nacchada ledu,vaddu ante Cheppu\nCheppanu.But  I love you 💚"
+            },
+            {
+                id: 2,
+                sender: "Karthik Pakanati",
+                receiver: "Priyanshu Pakanati",
+                date: "Message 2",
+                title: "Forever Grateful",
+                snippet: "I'll always be grateful to God for sending you...",
+                body: "I'll always be grateful to God for sending you into my life. You entered like an angle.There isn't a single day where I'm not thinking about you or i should  say I've been always thinking about you.Thank you 💚 for loving me, caring me and for being there in my life 🫂"
+            },
+            {
+                id: 3,
+                sender: "Karthik Pakanati",
+                receiver: "Priyanshu Pakanati",
+                date: "Message 3",
+                title: "You Mean the World",
+                snippet: "I have been really grateful to have you in my life...",
+                body: "I have been really grateful to have you in my life,Anshu.I don't know how to say but your meant world to me.there are so many things happened between us and will happen but I don't want that separate us,i expect it to make our stronger.I hope these will help us understand eachother way better."
+            }
+        ];
+
+        // 2. MEMORIES
+        const memoriesData = [
+            { timeDate: "May 2021 • Summer", title: "The First Sight", description: "May month of 2021 summer when i saw you for the first time\nThe same day when I was disappointed" },
+            { timeDate: "February 26, 2023", title: "At Your School", description: "26th Feb 2023 I met you at your school" },
+            { timeDate: "September 27, 2023 • Night", title: "Family & Cousins", description: "27th sept night 2023\nI'll never forget that moment of us infront of our family and cousins" },
+            { timeDate: "September 28, 2023", title: "The Sweet Kiss", description: "28th sept 2023\nWhen you kissed me" },
+            { timeDate: "August 13, 2025", title: "PVP Reunion", description: "13 august 2025 when I met you first time after 2023 in PvP" },
+            { timeDate: "October 31, 2025", title: "First Bike Ride", description: "31st October 2025\nThe first time,when we went to a ride on bike" },
+            { timeDate: "November 13, 2025", title: "PVP Again", description: "13th nov 2025\nWhen we met again in PVP" },
+            { timeDate: "February 13, 2026", title: "Months of Silence Broken", description: "13th Feb 2026 when we met again in PVP after months of not chatting" },
+            { timeDate: "March 26, 2026", title: "Ice Cream Date & Auto", description: "Mar 26th 2026\nWhen we were literally having ice cream date 🤣\nThen travelled in auto and you slapped me" },
+            { timeDate: "April 1, 2026", title: "Bangles & T-Shirt", description: "Apr 1st 2026 when i brought you bangles and brought me your t-shirt.\nThank you for the t-shirt" },
+            { timeDate: "April 11, 2026 • Night Ride", title: "A Magical Night", description: "Apr 11th 2026\nWhen we went to night ride.we spent some time it was magical an I loved every moment of it expect that accident 😂\nI'm sorry for touching your teigh" },
+            { timeDate: "Timeless Keepsakes", title: "Our Tokens of Love", description: "the 1st ring that you gave me\nMy bike keychain" }
+        ];
+
+        // 3. FANTASIES
+        const fantasiesList = [
+            "First kiss should be remembered life long want to make it so special",
+            "Want to have 2 kids",
+            "Want to sing with you",
+            "Want to dance with you",
+            "want to help you to wear saree",
+            "Want to Cook together,eat together",
+            "Want to go out on bike in the rain",
+            "Want to eat food by your hand",
+            "Want to get shirt button on by you",
+            "Want to kiss you in the rain",
+            "Want share cloths",
+            "Want to have hair styling by you",
+            "Want to eat the food made you",
+            "Want to spend time together infront of our cousins",
+            "Want to go to church together",
+            "Want to pray together",
+            "My fantasy is you, everything about you!!"
+        ];
+
+        const fantasiesData = fantasiesList.map((item, idx) => ({
+            timeDate: `Dream #${idx + 1}`,
+            title: `Fantasy ${idx + 1}`,
+            description: item
+        }));
+
+        /* ==================== DYNAMIC THEMES ==================== */
+        
+        // Array of different gradients and large background flowers (Roses, Sunflowers, etc.)
+        const storyThemes = [
+            { bg: "linear-gradient(135deg, #ff0844 0%, #ffb199 100%)", flower1: "🌹", flower2: "🌹" }, // Rich Rose
+            { bg: "linear-gradient(135deg, #f6d365 0%, #fda085 100%)", flower1: "🌻", flower2: "🌻" }, // Sunflower
+            { bg: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)", flower1: "💚", flower2: "🌿" }, // Green Love
+            { bg: "linear-gradient(135deg, #c471ed 0%, #f64f59 100%)", flower1: "🌺", flower2: "🌸" }, // Purple/Pink Hibiscus
+            { bg: "linear-gradient(135deg, #00b09b 0%, #96c93d 100%)", flower1: "🍀", flower2: "🌻" }, // Fresh Green
+            { bg: "linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%)", flower1: "🌸", flower2: "🌹" }, // Pink Blossoms
+            { bg: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", flower1: "🌷", flower2: "🌺" }  // Tulip Mix
+        ];
+
+        /* ==================== CORE LOGIC ==================== */
+
+        const screens = {
+            login: document.getElementById('login-screen'),
+            main: document.getElementById('main-screen'),
+            letter: document.getElementById('letter-viewer'),
+            stories: document.getElementById('story-viewer')
+        };
+        const errorMsg = document.getElementById('login-error');
+
+        function showScreen(screenKey) {
+            Object.values(screens).forEach(s => s.classList.add('hidden'));
+            screens[screenKey].classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        function handleLogin() {
+            const name = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            
+            if (!name) { errorMsg.innerText = "Please enter your name."; return; }
+            if (pass !== "151009") { errorMsg.innerText = "You aren't the one that Karthik loves"; return; }
+            
+            errorMsg.innerText = "";
+            spawnHeartsBurst();
+            setTimeout(() => { renderInbox(); showScreen('main'); }, 400);
+        }
+
+        function handleLogout() {
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            showScreen('login');
+        }
+
+        /* ==================== INBOX & LETTERS ==================== */
+        
+        function renderInbox() {
+            const list = document.getElementById('inbox-list');
+            list.innerHTML = '';
+            messagesData.forEach(msg => {
+                const card = document.createElement('div');
+                card.className = 'message-card glass-panel';
+                card.innerHTML = `
+                    <div class="msg-header">
+                        <span class="msg-sender">❤️ ${msg.sender}</span>
+                        <span class="msg-date">${msg.date}</span>
+                    </div>
+                    <div class="msg-title">${msg.title}</div>
+                    <div class="msg-snippet">${msg.snippet}</div>
+                `;
+                card.onclick = () => openLetter(msg.id);
+                list.appendChild(card);
+            });
+        }
+
+        function openLetter(id) {
+            const msg = messagesData.find(m => m.id === id);
+            const content = document.getElementById('letter-content-area');
+            content.innerHTML = `
+                <h3>${msg.title}</h3>
+                <div class="letter-meta">
+                    <strong>From:</strong> ${msg.sender} 💚<br>
+                    <strong>To:</strong> ${msg.receiver} (Love of my life) ❤️
+                </div>
+                <p>${msg.body}</p>
+                <div class="letter-footer">Forever yours,<br>${msg.sender}</div>
+            `;
+            showScreen('letter');
+            spawnHeartsBurst();
+        }
+
+        function closeLetter() { showScreen('main'); }
+
+        /* ==================== DYNAMIC STORIES LOGIC ==================== */
+        
+        let activeCollection = [];
+        let activeCategory = 'memories';
+        let currentStoryIndex = 0;
+        let storyTimeout;
+        const STORY_DURATION = 6500; // slightly longer to read
+
+        function openStoriesCollection(type) {
+            activeCategory = type;
+            activeCollection = type === 'memories' ? memoriesData : fantasiesData;
+            currentStoryIndex = 0;
+            
+            document.getElementById('story-category-tag').innerText = type === 'memories' ? '🌸 OUR MEMORIES' : '💚 OUR FANTASIES';
+
+            renderStoryProgressBars();
+            showScreen('stories');
+            playStory(currentStoryIndex);
+        }
+
+        function closeStories() {
+            clearTimeout(storyTimeout);
+            showScreen('main');
+        }
+
+        function renderStoryProgressBars() {
+            const container = document.getElementById('story-progress-bars');
+            container.innerHTML = '';
+            activeCollection.forEach((_, i) => {
+                container.innerHTML += `<div class="progress-segment"><div class="progress-fill" id="prog-fill-${i}"></div></div>`;
+            });
+        }
+
+        function applyTheme(index) {
+            // Pick a unique theme based on index
+            const theme = storyThemes[index % storyThemes.length];
+            
+            // Set dynamic background gradient
+            document.getElementById('story-bg-element').style.background = theme.bg;
+            
+            // Inject massive background flowers (Roses, Sunflowers, etc.)
+            document.getElementById('story-bg-flowers').innerHTML = `
+                <div class="story-huge-flower" style="top: -15%; left: -15%;">${theme.flower1}</div>
+                <div class="story-huge-flower" style="bottom: -15%; right: -15%; transform: rotate(-20deg);">${theme.flower2}</div>
+            `;
+        }
+
+        function playStory(index) {
+            clearTimeout(storyTimeout);
+            
+            // Manage progress bars
+            for(let i=0; i<activeCollection.length; i++) {
+                const fill = document.getElementById(`prog-fill-${i}`);
+                if (fill) {
+                    fill.style.transition = 'none';
+                    fill.style.width = i < index ? '100%' : '0%';
+                }
+            }
+
+            // Apply different background & flowers for this specific memory/fantasy
+            applyTheme(index);
+
+            // Populate Content
+            const item = activeCollection[index];
+            document.getElementById('story-date-display').innerText = item.timeDate;
+            document.getElementById('story-content-area').innerHTML = `
+                <div class="story-timeline-chip">📅 ${item.timeDate}</div>
+                <h2>${item.title}</h2>
+                <p>${item.description}</p>
+            `;
+
+            // Animate current bar
+            setTimeout(() => {
+                const currentFill = document.getElementById(`prog-fill-${index}`);
+                if (currentFill) {
+                    currentFill.style.transition = `width ${STORY_DURATION}ms linear`;
+                    currentFill.style.width = '100%';
+                }
+            }, 50);
+
+            storyTimeout = setTimeout(() => nextStory(), STORY_DURATION);
+        }
+
+        function nextStory() {
+            if (currentStoryIndex < activeCollection.length - 1) {
+                currentStoryIndex++;
+                playStory(currentStoryIndex);
+            } else {
+                closeStories();
+            }
+        }
+
+        function prevStory() {
+            if (currentStoryIndex > 0) {
+                currentStoryIndex--;
+                playStory(currentStoryIndex);
+            } else {
+                playStory(0);
+            }
+        }
+
+        /* ==================== VIBRANT PARTICLES ==================== */
+        
+        const romanticSymbols = ['❤️', '❤️', '💚', '💚', '🌹', '🌻', '✨']; // More red/green emphasis
+
+        function createFloatingHeart() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const el = document.createElement('div');
+            el.className = 'floating-heart';
+            el.innerText = romanticSymbols[Math.floor(Math.random() * romanticSymbols.length)];
+            el.style.left = Math.random() * 95 + 'vw';
+            el.style.animationDuration = (Math.random() * 2 + 3.5) + 's';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 4500);
+        }
+
+        function spawnHeartsBurst() {
+            for(let i=0; i<10; i++) {
+                setTimeout(createFloatingHeart, i * 120);
+            }
+        }
+
+        setInterval(createFloatingHeart, 900); // More frequent hearts
+
+        document.getElementById('password').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') handleLogin();
+        });
+    </script>
+</body>
+</html>
